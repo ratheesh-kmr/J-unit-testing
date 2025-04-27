@@ -1,54 +1,58 @@
 package softwaretesting;
 
-import com.opencsv.CSVReader;
-import com.opencsv.exceptions.CsvValidationException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvValidationException;
+
 public class App {
     public static void main(String[] args) {
-        // Path to the Zomato dataset CSV file
-        String csvFile = "./Dataset/zomato.csv";
-
-        // Lists to hold the Votes and Prices data
+        String csvFile = "C:/Users/rathe/Documents/Ratheesh got bored/SEM 6/J unit testing/junit/src/Dataset/zomato.csv"; 
         List<Double> votes = new ArrayList<>();
         List<Double> prices = new ArrayList<>();
 
-        // Read the CSV file
         try (CSVReader reader = new CSVReader(new FileReader(csvFile))) {
-            String[] nextLine;
-            reader.readNext(); // Skip header row if there is one
+            String[] line;
+            boolean isFirstLine = true;
+            while ((line = reader.readNext()) != null) {
+                if (isFirstLine) {
+                    isFirstLine = false; // Skip header
+                    continue;
+                }
 
-            while ((nextLine = reader.readNext()) != null) {
                 try {
-                    // Assuming the 'Votes' is at index 9 and 'Prices' is at index 11 (adjust accordingly)
-                    double vote = Double.parseDouble(nextLine[9]); // Column for votes
-                    double price = Double.parseDouble(nextLine[11]); // Column for prices
-                    
-                    // Add the values to the lists
-                    votes.add(vote);
-                    prices.add(price);
+                    // Handle rows properly, assuming columns might shift (Place Name, City)
+                    int len = line.length;
+                    if (len >= 12) {
+                        double vote = Double.parseDouble(line[len - 2].trim());
+                        double price = Double.parseDouble(line[len - 1].trim());
+                        votes.add(vote);
+                        prices.add(price);
+                    } else {
+                        System.out.println("Skipping row due to insufficient columns: " + String.join(",", line));
+                    }
                 } catch (NumberFormatException e) {
-                    // Handle invalid numbers or missing data
-                    System.out.println("Skipping row due to invalid data: " + String.join(",", nextLine));
+                    System.out.println("Skipping row due to number format error: " + String.join(",", line));
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException | CsvValidationException e) {
             e.printStackTrace();
-        } catch (CsvValidationException e) {
-            // Handle the CSV validation exception
-            System.out.println("Error reading the CSV file: " + e.getMessage());
         }
 
-        // Create and fit the model
+        if (votes.isEmpty() || prices.isEmpty()) {
+            System.out.println("No valid data available to train the model.");
+            return;
+        }
+
+        // Create and train the model
         LinearRegression model = new LinearRegression();
         model.fit(votes, prices);
 
-        // Make a prediction for a new value (e.g., 50 votes)
+        // Example prediction
         double predictedPrice = model.predict(50.0);
-
         System.out.println("Predicted price for 50 votes: " + predictedPrice);
     }
 }
