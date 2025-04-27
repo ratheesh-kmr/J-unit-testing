@@ -24,13 +24,22 @@ public class App {
                 }
 
                 try {
-                    // Handle rows properly, assuming columns might shift (Place Name, City)
                     int len = line.length;
+                    // if (line.length < 12) {
+                    //     System.out.println("Simulated Error: Missing columns, skipping this row.");
+                    //     continue;
+                    // }
+                    
                     if (len >= 12) {
                         double vote = Double.parseDouble(line[len - 2].trim());
                         double price = Double.parseDouble(line[len - 1].trim());
-                        votes.add(vote);
-                        prices.add(price);
+
+                        // Extra data processing: Ignore rows with 0 votes or 0 price
+
+                        if (vote > 0 && price > 0) {
+                            votes.add(vote);
+                            prices.add(price);
+                        }
                     } else {
                         System.out.println("Skipping row due to insufficient columns: " + String.join(",", line));
                     }
@@ -51,8 +60,15 @@ public class App {
         LinearRegression model = new LinearRegression();
         model.fit(votes, prices);
 
-        // Example prediction
+
         double predictedPrice = model.predict(50.0);
         System.out.println("Predicted price for 50 votes: " + predictedPrice);
+
+
+        System.out.println("\n--- Basic Statistics ---");
+        System.out.println("Votes Mean: " + model.mean(votes));
+        System.out.println("Votes StdDev: " + model.standardDeviation(votes));
+        System.out.println("Prices Mean: " + model.mean(prices));
+        System.out.println("Prices StdDev: " + model.standardDeviation(prices));
     }
 }
