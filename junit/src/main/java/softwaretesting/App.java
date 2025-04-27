@@ -10,7 +10,7 @@ import java.util.List;
 public class App {
     public static void main(String[] args) {
         // Path to the Zomato dataset CSV file
-        String csvFile = "src/Dataset/zomato.csv";
+        String csvFile = "./Dataset/zomato.csv";
 
         // Lists to hold the Votes and Prices data
         List<Double> votes = new ArrayList<>();
