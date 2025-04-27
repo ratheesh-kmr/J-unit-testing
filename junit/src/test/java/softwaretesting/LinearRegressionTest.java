@@ -1,29 +1,45 @@
 package softwaretesting;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 import java.util.Arrays;
-import java.util.List;
+import org.junit.jupiter.api.Test;
 
 public class LinearRegressionTest {
 
     @Test
-    public void testLinearRegressionPrediction() {
-        // Test data (Votes and Prices)
-        List<Double> votes = Arrays.asList(84.0, 45.0);
-        List<Double> prices = Arrays.asList(249.0, 129.0);
-        
-        // Create and fit the model
+    void testFitAndPredictSimpleCase() {
         LinearRegression model = new LinearRegression();
-        model.fit(votes, prices);
 
-        // Predict the price for 50 votes
-        double predictedPrice = model.predict(50.0);
+        // Example data: y = 2x + 1
+        model.fit(Arrays.asList(1.0, 2.0, 3.0), Arrays.asList(3.0, 5.0, 7.0));
 
-        // In this case, you would manually calculate the expected value or test for correctness
-        double expectedPrice = 164.0;  // Example expected value, adjust based on your calculations
-        
-        // Allow a margin of error (e.g., 10.0) for the prediction
-        assertEquals(expectedPrice, predictedPrice, 10.0);
+        double predicted = model.predict(4.0);
+        assertEquals(9.0, predicted, 0.0001); // Allowing small delta for floating point
+    }
+
+    @Test
+    void testInterceptAndSlopeCalculation() {
+        LinearRegression model = new LinearRegression();
+
+        model.fit(Arrays.asList(1.0, 2.0, 3.0), Arrays.asList(2.0, 4.0, 6.0));
+
+        // Since y = 2x, intercept should be 0, slope should be 2
+        assertEquals(0.0, model.predict(0.0), 0.0001);
+        assertEquals(2.0, model.predict(1.0), 0.0001);
+        assertEquals(4.0, model.predict(2.0), 0.0001);
+    }
+
+    @Test
+    void testMismatchedInputSizes() {
+        LinearRegression model = new LinearRegression();
+
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            model.fit(Arrays.asList(1.0, 2.0), Arrays.asList(3.0));
+        });
+
+        String expectedMessage = "xValues and yValues must have the same length";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
     }
 }
